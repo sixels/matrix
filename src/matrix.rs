@@ -1,9 +1,14 @@
 use std::{io::Write, sync::mpsc, thread, time::Duration};
 
-use crossterm::{cursor, execute, terminal::{self, ClearType}, queue, style::{SetBackgroundColor, Color, SetForegroundColor, Print}};
+use crossterm::{
+    cursor, execute, queue,
+    style::{Color, Print, SetBackgroundColor, SetForegroundColor},
+    terminal::{self, ClearType},
+};
+use rand::Rng;
 
 use crate::{
-    event::{TermEvent, self},
+    event::{self, TermEvent},
     glyph::{self, Glyph},
     FPS,
 };
@@ -90,21 +95,36 @@ impl Matrix {
                                 // x is implicitly greater than 0
                                 let x = glyph.x as u16;
                                 // we already asserted y is greater than 0
-                                let y = glyph.y.ceil() as u16;
+                                let y = glyph.y.floor() as u16;
 
-                                let fg = if i == 0 {
-                                    Color::Rgb {
-                                        r: 150,
-                                        g: 255,
-                                        b: 150,
-                                    }
+                                // there is a small change of the glyph character change on each
+                                // update. However, the first glyph has a higher change of changing.
+                                // We will be using this if block instead of create a new one.
+                                let (fg, c) = if i == 0 {
+                                    (
+                                        Color::Rgb {
+                                            r: 150,
+                                            g: 255,
+                                            b: 150,
+                                        },
+                                        rng.gen_ratio(1, 10)
+                                            .then(|| glyph::random_glyph_char(&mut rng))
+                                            .unwrap_or(glyph.c),
+                                    )
                                 } else {
-                                    Color::Rgb {
-                                        r: 10,
-                                        g: 255 - ((200/tail_len)*i) as u8,
-                                        b: 10,
-                                    }
+                                    (
+                                        Color::Rgb {
+                                            r: 10,
+                                            g: 255 - ((200 / tail_len) * i) as u8,
+                                            b: 10,
+                                        },
+                                        rng.gen_ratio(1, 15)
+                                            .then(|| glyph::random_glyph_char(&mut rng))
+                                            .unwrap_or(glyph.c),
+                                    )
                                 };
+
+                                glyph.c = c;
 
                                 queue!(
                                     self.out,

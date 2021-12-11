@@ -56,6 +56,6 @@ fn random_xy(rng: &mut impl Rng, max_x: f32) -> (f32, f32) {
     (rng.gen_range(0.0..max_x), rng.gen_range(-80.0..-10.0))
 }
 
-fn random_glyph_char(rng: &mut impl Rng) -> char {
+pub(crate) fn random_glyph_char(rng: &mut impl Rng) -> char {
     char::from_u32(rng.gen_range(GLYPH_CHAR_START..GLYPH_CHAR_END)).unwrap()
 }
