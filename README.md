@@ -2,4 +2,4 @@
 
 A Matrix inspired digital rain that runs on terminal
 
-assets/matrix.mp4
+https://raw.githubusercontent.com/sixels/matrix/main/assets/matrix.mp4
